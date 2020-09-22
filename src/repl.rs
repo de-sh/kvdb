@@ -2,7 +2,8 @@ use std::fmt;
 use std::io;
 use std::io::Write;
 
-#[derive(Clone)]
+use crate::parser::Parser;
+
 pub struct REPL {
     cmd: String,
 }
@@ -14,9 +15,12 @@ impl REPL {
 
     pub fn repl(&mut self) {
         loop {
-            print!("db > "); // Prompt
+            // Prompt
+            print!("db > ");
+            // Input
             self.read_input();
-            self.parse();
+            // Parsing
+            Parser::parse(&self.cmd);
         }
     }
 
@@ -27,13 +31,6 @@ impl REPL {
             .read_line(&mut cmd)
             .expect("Error in reading command, exiting REPL.");
         self.cmd = cmd.trim_end().to_string();
-    }
-
-    fn parse(&mut self) {
-        match self.cmd.as_ref() {
-            ".exit" => std::process::exit(0),
-            cmd => println!("db: command not found: {}", cmd),
-        }
     }
 }
 
