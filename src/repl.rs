@@ -2,7 +2,7 @@ use std::fmt;
 use std::io;
 use std::io::Write;
 
-use crate::parser;
+use crate::parser::{MetaCmdResult, Statement};
 
 pub struct REPL {
     cmd: String,
@@ -21,9 +21,17 @@ impl REPL {
             self.read_input();
             // Parse Meta Commands or Prepare SQL
             if self.cmd.starts_with(".") {
-                parser::MetaCmdResult::new(self.cmd);
+                match MetaCmdResult::run(&self.cmd) {
+                    MetaCmdResult::Unrecognized => println!("db: command not found: {}", self.cmd),
+                    MetaCmdResult::Success => continue,
+                }
             } else {
-                parser::PrepResult::new(self.cmd);
+                let statement = Statement::prep(&self.cmd);
+                if statement.is_unrec() {
+                    println!("db: command not found: {}", self.cmd);
+                } else {
+                    continue // 
+                }
             }
         }
     }
@@ -34,7 +42,7 @@ impl REPL {
         io::stdin()
             .read_line(&mut cmd)
             .expect("Error in reading command, exiting REPL.");
-        self.cmd = cmd.trim_end().to_string();
+        self.cmd = cmd.trim().to_string();
     }
 }
 

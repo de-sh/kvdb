@@ -1,5 +1,5 @@
-mod repl;
 pub mod parser;
+mod repl;
 use repl::REPL;
 
 fn main() {
