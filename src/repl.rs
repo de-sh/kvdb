@@ -2,7 +2,7 @@ use std::fmt;
 use std::io;
 use std::io::Write;
 
-use crate::parser::Parser;
+use crate::parser;
 
 pub struct REPL {
     cmd: String,
@@ -19,8 +19,12 @@ impl REPL {
             print!("db > ");
             // Input
             self.read_input();
-            // Parsing
-            Parser::parse(&self.cmd);
+            // Parse Meta Commands or Prepare SQL
+            if self.cmd.starts_with(".") {
+                parser::MetaCmdResult::new(self.cmd);
+            } else {
+                parser::PrepResult::new(self.cmd);
+            }
         }
     }
 
