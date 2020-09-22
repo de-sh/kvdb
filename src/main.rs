@@ -1,3 +1,6 @@
+mod repl;
+use repl::REPL;
+
 fn main() {
-    println!("Hello, world!");
+    REPL::new().repl();
 }
