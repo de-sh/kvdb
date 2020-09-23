@@ -12,41 +12,18 @@ impl MetaCmdResult {
     }
 }
 
-// Fixed schema for insert
-pub struct Row {
-    pub id: u32,
-    pub username: String,
-    pub email: String,
-}
-
-impl Row {
-    pub fn new(inst: Vec<&str>) -> Self {
-        Self {
-            id: match inst[0].parse() {
-                Err(e) => {
-                    eprintln!("Error: {}, Schema requires an integer. Defaulting to 0.", e);
-                    0
-                }
-                Ok(r) => r,
-            },
-            username: inst[1].to_string(),
-            email: inst[2].to_string(),
-        }
-    }
-}
-
 #[derive(PartialEq)]
 pub enum StatementType {
-    Insert,
-    Select,
+    Set,
+    Get,
     Unrecognized,
 }
 
 impl StatementType {
-    fn get(word: &str) -> Self {
-        match word {
-            "insert" => Self::Insert,
-            "select" => Self::Select,
+    fn check(word: &str) -> Self {
+        match word.to_lowercase().as_ref() {
+            "set" => Self::Set,
+            "get" => Self::Get,
             _ => Self::Unrecognized,
         }
     }
@@ -54,20 +31,24 @@ impl StatementType {
 
 pub struct Statement {
     pub stype: StatementType,
-    pub row_to_insert: Option<Row>, // only used in an insert statement
+    pub key: Option<String>, // only used in get/set/rem statements.
+    pub value: Option<String>, // only used in an set statement.
 }
 
 impl Statement {
     fn new(cmd_words: Vec<&str>) -> Self {
-        let stype = StatementType::get(cmd_words[0]);
-        let row_to_insert = match stype {
-            StatementType::Insert => Some(Row::new(cmd_words[1..].to_vec())),
-            _ => None,
-        };
-        
+        let stype = StatementType::check(cmd_words[0]);
+
         Self {
+            key: match stype {
+                StatementType::Get | StatementType::Set => Some(cmd_words[1].to_string()),
+                _ => None,
+            },
+            value: match stype {
+                StatementType::Set => Some(cmd_words[2].to_string()),
+                _ => None,
+            },
             stype,
-            row_to_insert,
         }
     }
 

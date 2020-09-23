@@ -1,4 +1,5 @@
-use crate::parser::{Row, Statement, StatementType};
+use crate::parser::{Statement, StatementType};
+use std::collections::HashMap;
 
 pub enum ExecResult {
     Success,
@@ -6,24 +7,36 @@ pub enum ExecResult {
 }
 
 pub struct Store {
-    storage: Vec<Row>,
+    storage: HashMap<String, String>,
 }
 
 impl Store {
     pub fn new() -> Self {
-        Self { storage: vec![] }
+        Self {
+            storage: HashMap::new(),
+        }
     }
 
     pub fn execute(&mut self, st: Statement) -> ExecResult {
         match st.stype {
-            StatementType::Insert => self.insert(st.row_to_insert.unwrap()),
-            StatementType::Select => ExecResult::Success,
+            StatementType::Set => self.set(st.key.unwrap(), st.value.unwrap()),
+            StatementType::Get => match self.get(&st.key.unwrap()) {
+                Some(s) => {
+                    println!("{}", s);
+                    ExecResult::Success
+                }
+                None => ExecResult::Failed,
+            },
             _ => ExecResult::Failed,
         }
     }
 
-    fn insert(&mut self, row: Row) -> ExecResult {
-        self.storage.push(row);
+    fn set(&mut self, key: String, value: String) -> ExecResult {
+        self.storage.insert(key, value);
         ExecResult::Success
+    }
+
+    fn get(&self, key: &str) -> Option<&String> {
+        self.storage.get(key)
     }
 }

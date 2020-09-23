@@ -46,13 +46,11 @@ impl REPL {
                 MetaCmdResult::Success => {}
             }
         } else {
-            match Statement::prep(&self.cmd) {
-                Statement {
-                    stype: StatementType::Unrecognized,
-                    row_to_insert: _,
-                } => println!("db: command not found: {}", self.cmd),
-                statement => {
-                    self.store.execute(statement);
+            let st = Statement::prep(&self.cmd);
+            match st.stype {
+                StatementType::Unrecognized => println!("db: command not found: {}", self.cmd),
+                _ => {
+                    self.store.execute(st);
                 }
             }
         }
