@@ -18,15 +18,10 @@ impl Store {
     }
 
     pub fn execute(&mut self, st: Statement) -> ExecResult {
+        let key = st.key.unwrap();
         match st.stype {
-            StatementType::Set => self.set(st.key.unwrap(), st.value.unwrap()),
-            StatementType::Get => match self.get(&st.key.unwrap()) {
-                Some(s) => {
-                    println!("{}", s);
-                    ExecResult::Success
-                }
-                None => ExecResult::Failed,
-            },
+            StatementType::Set => self.set(key, st.value.unwrap()),
+            StatementType::Get => self.get(key),
             _ => ExecResult::Failed,
         }
     }
@@ -36,7 +31,16 @@ impl Store {
         ExecResult::Success
     }
 
-    fn get(&self, key: &str) -> Option<&String> {
-        self.storage.get(key)
+    fn get(&self, key: String) -> ExecResult {
+        match self.storage.get(&key) {
+            Some(s) => {
+                println!("{}", s);
+                ExecResult::Success
+            },
+            None => {
+                eprintln!("Error: no value associated with key {}.", key);
+                ExecResult::Failed
+            },
+        }
     }
 }
