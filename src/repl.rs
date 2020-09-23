@@ -2,37 +2,30 @@ use std::fmt;
 use std::io;
 use std::io::Write;
 
-use crate::parser::{MetaCmdResult, Statement};
+use crate::parser::{MetaCmdResult, Statement, StatementType};
+use crate::store::Store;
 
 pub struct REPL {
     cmd: String,
+    store: Store,
 }
 
 impl REPL {
     pub fn new() -> Self {
-        REPL { cmd: "".to_owned() }
+        REPL {
+            cmd: "".to_owned(),
+            store: Store::new(),
+        }
     }
 
     pub fn repl(&mut self) {
         loop {
             // Prompt
             print!("db > ");
-            // Input
+            // Read
             self.read_input();
-            // Parse Meta Commands or Prepare SQL
-            if self.cmd.starts_with(".") {
-                match MetaCmdResult::run(&self.cmd) {
-                    MetaCmdResult::Unrecognized => println!("db: command not found: {}", self.cmd),
-                    MetaCmdResult::Success => continue,
-                }
-            } else {
-                let statement = Statement::prep(&self.cmd);
-                if statement.is_unrec() {
-                    println!("db: command not found: {}", self.cmd);
-                } else {
-                    continue // 
-                }
-            }
+            // Evaluate
+            self.parse_input();
         }
     }
 
@@ -43,6 +36,26 @@ impl REPL {
             .read_line(&mut cmd)
             .expect("Error in reading command, exiting REPL.");
         self.cmd = cmd.trim().to_string();
+    }
+
+    fn parse_input(&mut self) {
+        // Parse Meta Commands or Prepare SQL
+        if self.cmd.starts_with(".") {
+            match MetaCmdResult::run(&self.cmd) {
+                MetaCmdResult::Unrecognized => println!("db: command not found: {}", self.cmd),
+                MetaCmdResult::Success => {}
+            }
+        } else {
+            match Statement::prep(&self.cmd) {
+                Statement {
+                    stype: StatementType::Unrecognized,
+                    row_to_insert: _,
+                } => println!("db: command not found: {}", self.cmd),
+                statement => {
+                    self.store.execute(statement);
+                }
+            }
+        }
     }
 }
 
