@@ -39,7 +39,7 @@ impl REPL {
     }
 
     fn parse_input(&mut self) {
-        // Parse Meta Commands or Prepare SQL
+        // Parse Meta Commands or Execute them on storage
         if self.cmd.starts_with(".") {
             match MetaCmdResult::run(&self.cmd) {
                 MetaCmdResult::Unrecognized => println!("db: command not found: {}", self.cmd),
@@ -49,9 +49,7 @@ impl REPL {
             let st = Statement::prep(&self.cmd);
             match st.stype {
                 StatementType::Unrecognized => println!("db: command not found: {}", self.cmd),
-                _ => {
-                    self.store.execute(st);
-                }
+                _ => self.store.execute(st),
             }
         }
     }
