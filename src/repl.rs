@@ -1,6 +1,3 @@
-/// Code pertaining to environment management of the REPL. 
-/// Provides an interface to operate on the Storage Engine.
-
 use std::io;
 use std::io::Write;
 

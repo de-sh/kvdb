@@ -1,7 +1,3 @@
-/// The parser handles the task of converting commands passed to the repl
-/// into something that can be used by it to understand and put into
-/// operational use with the storage engine.
-
 /// Used in executing meta commands on the REPL.
 pub enum MetaCmdResult {
     Success,

@@ -1,5 +1,3 @@
-/// Code relating to the heart of a database, the storage engine.
-
 use std::collections::HashMap;
 
 /// Depicts whether an operation was successfully executed or not.
