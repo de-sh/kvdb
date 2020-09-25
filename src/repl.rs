@@ -54,12 +54,12 @@ impl REPL {
             }
         } else {
             let st = Statement::prep(&self.cmd);
-            let key = st.key.unwrap();
+            let key = st.key.unwrap_or("".to_string());
             // If type of statement is legit, execute, else fail.
             match match st.stype {
                 StatementType::Set => self.store.set(key, st.value.unwrap()),
                 StatementType::Get => {
-                    match self.store.get(key) {
+                    match self.store.get(key.clone()) {
                         Ok(res) => {
                             println!("{}", res);
                             ExecResult::Success
@@ -67,7 +67,7 @@ impl REPL {
                         Err(ExecResult::Failed) => {
                             // If the key doesn't exist, get() explicitly returns this,
                             // so print the desired Error message.
-                            eprintln!("Error: No value associated with key `{}`.", *key);
+                            eprintln!("Error: No value associated with key `{}`.", key);
                             ExecResult::Failed
                         },
                         _ => ExecResult::Failed,
