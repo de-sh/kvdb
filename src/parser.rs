@@ -25,7 +25,7 @@ pub enum StatementType {
     Rem,
     /// No such operation exists.
     Unk,
-    /// The parser has failed to understand what the user wants 
+    /// The parser has failed to understand what the user wants
     /// to do. Parsing has failed due to wrong command syntax.
     Fail,
 }
@@ -79,7 +79,7 @@ impl Statement {
         // the statement key, else the statement has failed to parse.
         let key = match stype {
             StatementType::Get | StatementType::Set | StatementType::Rem => {
-                if cmd_words.len() < 1 {
+                if cmd_words.len() < 2 {
                     // Incase the user forgets to input required options
                     // for an operation, fail by setting None.
                     eprintln!(
@@ -100,7 +100,7 @@ impl Statement {
         // empty string value.
         let value = match stype {
             StatementType::Set => {
-                if cmd_words.len() < 2 {
+                if cmd_words.len() < 3 {
                     // Incase the user forgets to input required options
                     // for an operation, fail by setting None.
                     eprintln!(
@@ -121,13 +121,17 @@ impl Statement {
             }
         };
 
-        // Quick Fix to #1. If for most operations key is set to None and for set operation only, 
+        // Quick Fix to #1. If for most operations key is set to None and for set operation only,
         // if value is set to None, set stype to Fail to fail parsing.
-        if !(stype == StatementType::Set && value.is_some()) && key.is_some() {
+        if !(stype == StatementType::Set && value.is_none()) && key.is_some() {
             Self { stype, key, value }
         } else {
             // Fail state, when user forgets to pass necessary inputs.
-            Self { stype: StatementType::Fail, key: None, value: None }
+            Self {
+                stype: StatementType::Fail,
+                key: None,
+                value: None,
+            }
         }
     }
 }
