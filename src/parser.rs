@@ -83,7 +83,7 @@ impl Statement {
                     // Incase the user forgets to input required options
                     // for an operation, fail by setting None.
                     eprintln!(
-                        "Error: Operation `{}` was ignored, KEY not provided.",
+                        "Error: `{}` operation ignored, KEY not provided.",
                         stype.get_word()
                     );
                     None
@@ -104,7 +104,7 @@ impl Statement {
                     // Incase the user forgets to input required options
                     // for an operation, fail by setting None.
                     eprintln!(
-                        "Error: Operation `{}` was ignored, VALUE not provided.",
+                        "Error: `{}` operation ignored, VALUE not provided.",
                         stype.get_word()
                     );
                     None
