@@ -23,19 +23,16 @@ impl Store {
     /// Operates HashMap::insert()
     pub fn set(&mut self, key: String, value: String) -> ExecResult {
         // Fails if key already points to another value, else stores key-value pair and returns success.
-        match self.storage.contains_key(&key) {
-            true => {
-                eprintln!(
-                    "Error: `{}` already associated with value `{}`.",
-                    self.storage.get(&key).unwrap(),
-                    key
-                );
-                ExecResult::Failed
-            }
-            _ => {
-                self.storage.insert(key, value);
-                ExecResult::Success
-            }
+        if self.storage.contains_key(&key) {
+            eprintln!(
+                "Error: `{}` already associated with value `{}`.",
+                self.storage.get(&key).unwrap(),
+                key
+            );
+            ExecResult::Failed
+        } else {
+            self.storage.insert(key, value);
+            ExecResult::Success
         }
     }
 
@@ -44,7 +41,7 @@ impl Store {
     pub fn get(&self, key: String) -> Result<String, ExecResult> {
         match self.storage.get(&key) {
             None => Err(ExecResult::Failed),
-            Some(s) => Ok(s.to_string())
+            Some(s) => Ok(s.to_string()),
         }
     }
 

@@ -23,9 +23,11 @@ pub enum StatementType {
     Get,
     /// Relates to the rem() method of the Storage Engine.
     Rem,
-    /// The parser has failed to understand what the user 
-    /// wants to do, No such operation exists.
-    Unrecognized,
+    /// No such operation exists.
+    Unk,
+    /// The parser has failed to understand what the user wants
+    /// to do. Parsing has failed due to wrong command syntax.
+    Fail,
 }
 
 impl StatementType {
@@ -35,7 +37,16 @@ impl StatementType {
             "set" | "put" | "insert" | "i" => Self::Set,
             "get" | "select" | "o" => Self::Get,
             "rem" | "remove" | "del" | "delete" | "rm" => Self::Rem,
-            _ => Self::Unrecognized,
+            _ => Self::Unk,
+        }
+    }
+
+    fn get_word(&self) -> String {
+        match self {
+            Self::Set => "SET".to_string(),
+            Self::Get => "GET".to_string(),
+            Self::Rem => "REM".to_string(),
+            _ => "Unknown".to_string(),
         }
     }
 }
@@ -64,33 +75,63 @@ impl Statement {
             false => "".to_string(),
         };
 
-        Self {
-            key: match stype {
-                StatementType::Get | StatementType::Set | StatementType::Rem => {
-                    // The first word after the operation keyword is supposed to be
-                    // the statement key, else the statement has failed to parse.
-                    // TODO: Figure out how to backout of execution and fail.
+        // The first word after the operation keyword is supposed to be
+        // the statement key, else the statement has failed to parse.
+        let key = match stype {
+            StatementType::Get | StatementType::Set | StatementType::Rem => {
+                if cmd_words.len() < 2 {
+                    // Incase the user forgets to input required options
+                    // for an operation, fail by setting None.
+                    eprintln!(
+                        "Error: `{}` operation ignored, KEY not provided.",
+                        stype.get_word()
+                    );
+                    None
+                } else {
                     Some(cmd_words[1].to_string())
                 }
-                _ => None,
-            },
-            value: match stype {
-                StatementType::Set => {
-                    // The string after the operation keyword and the statement key
-                    // is the statement value. Parsing should fail if no such value
-                    // for the `set` operation. Currently, the code sets value to an
-                    // empty string value. TODO: Figure out how to backout and fail.
-                    Some(cmd_val)
-                },
-                _ => {
-                    if cmd_words.len() > 2 {
-                        // Incase the user passes in too much data for an operation, warn them.
-                        eprintln!("Warning: Too many inputs, `{}` was ignored.", cmd_val);
-                    }
+            }
+            _ => None,
+        };
+
+        // The string after the operation keyword and the statement key
+        // is the statement value. Parsing should fail if no such value
+        // for the `set` operation. Currently, the code sets value to an
+        // empty string value.
+        let value = match stype {
+            StatementType::Set => {
+                if cmd_words.len() < 3 {
+                    // Incase the user forgets to input required options
+                    // for an operation, fail by setting None.
+                    eprintln!(
+                        "Error: `{}` operation ignored, VALUE not provided.",
+                        stype.get_word()
+                    );
                     None
+                } else {
+                    Some(cmd_val)
                 }
-            },
-            stype,
+            }
+            _ => {
+                if cmd_words.len() > 2 {
+                    // Incase the user passes in too much data for an operation, warn them.
+                    eprintln!("Warning: Too many inputs, `{}` was ignored.", cmd_val);
+                }
+                None
+            }
+        };
+
+        // Quick Fix to #1. If for most operations key is set to None and for set operation only,
+        // if value is set to None, set stype to Fail to fail parsing.
+        if !(stype == StatementType::Set && value.is_none()) && key.is_some() {
+            Self { stype, key, value }
+        } else {
+            // Fail state, when user forgets to pass necessary inputs.
+            Self {
+                stype: StatementType::Fail,
+                key: None,
+                value: None,
+            }
         }
     }
 }
