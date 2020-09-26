@@ -98,6 +98,12 @@ impl MetaCmdResult {
     pub fn run(cmd: &String) -> Self {
         match cmd.as_ref() {
             ".exit" => std::process::exit(0),
+            ".version" => {
+                if let Some(ver) = option_env!("CARGO_PKG_VERSION"){
+                    println!("You are using KVDB v{}", ver);
+                }
+                Self::Success
+            },
             _ => Self::Unrecognized,
         }
     }
