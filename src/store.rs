@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::Hash;
 
-
 /// Depicts whether an operation was successfully executed or not.
 pub enum ExecResult {
     Success,
@@ -10,15 +9,15 @@ pub enum ExecResult {
 }
 
 /// The Storage Engine
-pub struct Store<A,B> {
+pub struct Store<A, B> {
     /// A KV store in the form of in-memory HashMap.
     /// Types A and B can be defined by the use case.
     storage: HashMap<A, B>,
 }
 
-/// As is clear from the implementation, types A and B must implement Display 
+/// As is clear from the implementation, types A and B must implement Display
 /// to be 'printable'. While A must also implement Hash and Eq traits
-impl<A: Hash + Eq + Display, B: Display + Clone> Store<A,B> {
+impl<A: Hash + Eq + Display, B: Display + Clone> Store<A, B> {
     /// Creates a new Storage Engine.
     pub fn new() -> Self {
         Self {

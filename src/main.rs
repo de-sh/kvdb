@@ -3,7 +3,7 @@
 /// operational use with the storage engine.
 pub mod parser;
 
-/// Code pertaining to environment management of the REPL. 
+/// Code pertaining to environment management of the REPL.
 /// Provides an interface to operate on the Storage Engine.
 mod repl;
 

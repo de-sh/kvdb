@@ -63,21 +63,21 @@ impl REPL {
                         Ok(res) => {
                             println!("{}", res);
                             ExecResult::Success
-                        },
+                        }
                         Err(ExecResult::Failed) => {
                             // If the key doesn't exist, get() explicitly returns this,
                             // so print the desired Error message.
                             eprintln!("Error: No value associated with key `{}`.", key);
                             ExecResult::Failed
-                        },
+                        }
                         _ => ExecResult::Failed,
                     }
-                },
+                }
                 StatementType::Del => self.store.del(key),
                 StatementType::Unk => {
                     eprintln!("db: command not found: {}", self.cmd);
                     ExecResult::Failed
-                },
+                }
                 StatementType::Fail => ExecResult::Failed,
             } {
                 ExecResult::Failed => eprintln!("Command Execution Failed."),

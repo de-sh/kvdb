@@ -41,6 +41,7 @@ impl StatementType {
         }
     }
 
+    /// Get string form of command words from the StatementType object.
     fn get_word(&self) -> String {
         match self {
             Self::Set => "SET".to_string(),
@@ -114,26 +115,28 @@ impl Statement {
             }
             StatementType::Get | StatementType::Del => {
                 if cmd_words.len() > 2 {
-                    // Incase the user unnecessarily inputs a value for either 
+                    // Incase the user unnecessarily inputs a value for either
                     // GET or DEL operations, warn them and don't use the value.
                     eprintln!("Warning: Too many inputs, `{}` was ignored.", cmd_val);
                 }
                 None
-            },
+            }
             _ => None,
         };
 
         // Quick Fix to #1. If for most operations key is set to None and for set operation only,
-        // if value is set to None, set stype to Fail to fail parsing.
-        if !(stype == StatementType::Set && value.is_none()) && key.is_some() {
-            Self { stype, key, value }
-        } else {
+        // if value is set to None, set stype to Fail to fail parsing. All Unk operations are passed as is.
+        if (stype == StatementType::Set && value.is_none())
+            || (stype != StatementType::Unk && key.is_none())
+        {
             // Fail state, when user forgets to pass necessary inputs.
             Self {
                 stype: StatementType::Fail,
                 key: None,
                 value: None,
             }
+        } else {
+            Self { stype, key, value }
         }
     }
 }
