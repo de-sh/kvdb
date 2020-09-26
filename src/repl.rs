@@ -8,8 +8,8 @@ use crate::store::{ExecResult, Store};
 pub struct REPL {
     /// User input read from the CLI, in string form.
     cmd: String,
-    /// Storage Engine currently in use.
-    store: Store,
+    /// Storage Engine used by the REPL with string based storage.
+    store: Store<String, String>,
 }
 
 impl REPL {
