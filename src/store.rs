@@ -18,7 +18,7 @@ pub struct Store<A,B> {
 
 /// As is clear from the implementation, types A and B must implement Display 
 /// to be 'printable'. While A must also implement Hash and Eq traits
-impl<A: Hash + Eq + Display, B: Display> Store<A,B> {
+impl<A: Hash + Eq + Display, B: Display + Clone> Store<A,B> {
     /// Creates a new Storage Engine.
     pub fn new() -> Self {
         Self {
@@ -43,11 +43,11 @@ impl<A: Hash + Eq + Display, B: Display> Store<A,B> {
     }
 
     /// Operates HashMap::get() and fails if key-value pair doesn't
-    /// exist, else returns (value, success).
+    /// exist, else returns value on success.
     pub fn get(&self, key: A) -> Result<B, ExecResult> {
         match self.storage.get(&key) {
             None => Err(ExecResult::Failed),
-            Some(s) => Ok(B::from(s)),
+            Some(s) => Ok(B::from(s.clone())),
         }
     }
 

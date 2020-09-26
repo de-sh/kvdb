@@ -75,7 +75,7 @@ impl REPL {
                 },
                 StatementType::Rem => self.store.rem(key),
                 StatementType::Unk => {
-                    println!("db: command not found: {}", self.cmd);
+                    eprintln!("db: command not found: {}", self.cmd);
                     ExecResult::Failed
                 },
                 StatementType::Fail => ExecResult::Failed,
