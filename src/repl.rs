@@ -74,10 +74,11 @@ impl REPL {
                     }
                 },
                 StatementType::Rem => self.store.rem(key),
-                StatementType::Unrecognized => {
+                StatementType::Unk => {
                     println!("db: command not found: {}", self.cmd);
                     ExecResult::Failed
-                }
+                },
+                StatementType::Fail => ExecResult::Failed,
             } {
                 ExecResult::Failed => eprintln!("Command Execution Failed."),
                 ExecResult::Success => println!("Success: OK"),
