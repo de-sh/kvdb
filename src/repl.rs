@@ -1,7 +1,7 @@
 use std::io;
 use std::io::Write;
 
-use crate::parser::{MetaCmdResult, Statement, StatementType};
+use crate::parser::{Statement, StatementType};
 use crate::store::{ExecResult, Store};
 
 /// The REPL struct is used to hold environment variables relating to the REPL.
@@ -83,6 +83,22 @@ impl REPL {
                 ExecResult::Failed => eprintln!("Command Execution Failed."),
                 ExecResult::Success => println!("Success: OK"),
             }
+        }
+    }
+}
+
+/// Used in executing meta commands on the REPL.
+pub enum MetaCmdResult {
+    Success,
+    Unrecognized,
+}
+
+impl MetaCmdResult {
+    /// Execute Meta commands on the REPL.
+    pub fn run(cmd: &String) -> Self {
+        match cmd.as_ref() {
+            ".exit" => std::process::exit(0),
+            _ => Self::Unrecognized,
         }
     }
 }

@@ -1,19 +1,3 @@
-/// Used in executing meta commands on the REPL.
-pub enum MetaCmdResult {
-    Success,
-    Unrecognized,
-}
-
-impl MetaCmdResult {
-    /// Execute Meta commands on the REPL.
-    pub fn run(cmd: &String) -> Self {
-        match cmd.as_ref() {
-            ".exit" => std::process::exit(0),
-            _ => Self::Unrecognized,
-        }
-    }
-}
-
 /// There are 3 types of statement in KVDB, GET/SET/DEL.
 #[derive(PartialEq)]
 pub enum StatementType {
