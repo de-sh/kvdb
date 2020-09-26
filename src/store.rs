@@ -52,16 +52,16 @@ impl<A: Hash + Eq + Display, B: Display + Clone> Store<A,B> {
     }
 
     /// Operates HashMap::remove() and fails if the key-value pair
-    /// doesn't exist, else removes it and returns success.
-    pub fn rem(&mut self, key: A) -> ExecResult {
+    /// doesn't exist, else deletes it and returns success.
+    pub fn del(&mut self, key: A) -> ExecResult {
         match self.storage.remove(&key) {
             Some(val) => {
-                println!("Removed: {} -> {}", key, val);
+                println!("Deleted: {} -> {}", key, val);
                 ExecResult::Success
             }
             None => {
                 eprintln!(
-                    "Error: Can't remove, as no value associated with key `{}`.",
+                    "Error: Can't deleteremove, as no value associated with key `{}`.",
                     key
                 );
                 ExecResult::Failed

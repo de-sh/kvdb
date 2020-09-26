@@ -14,15 +14,15 @@ impl MetaCmdResult {
     }
 }
 
-/// There are 3 types of statement in KVDB, GET/SET/REM.
+/// There are 3 types of statement in KVDB, GET/SET/DEL.
 #[derive(PartialEq)]
 pub enum StatementType {
     /// Relates to the set() method of the Storage Engine.
     Set,
     /// Relates to the get() method of the Storage Engine.
     Get,
-    /// Relates to the rem() method of the Storage Engine.
-    Rem,
+    /// Relates to the del() method of the Storage Engine.
+    Del,
     /// No such operation exists.
     Unk,
     /// The parser has failed to understand what the user wants
@@ -34,9 +34,9 @@ impl StatementType {
     /// Convert written operation keywords into enum symbols.
     fn check(word: &str) -> Self {
         match word.to_lowercase().as_ref() {
-            "set" | "put" | "insert" | "i" => Self::Set,
-            "get" | "select" | "o" => Self::Get,
-            "rem" | "remove" | "del" | "delete" | "rm" => Self::Rem,
+            "set" | "put" | "insert" | "in" | "i" => Self::Set,
+            "get" | "select" | "output" | "out" | "o" => Self::Get,
+            "del" | "delete" | "rem" | "remove" | "rm" | "d" => Self::Del,
             _ => Self::Unk,
         }
     }
@@ -45,7 +45,7 @@ impl StatementType {
         match self {
             Self::Set => "SET".to_string(),
             Self::Get => "GET".to_string(),
-            Self::Rem => "REM".to_string(),
+            Self::Del => "DEL".to_string(),
             _ => "Unknown".to_string(),
         }
     }
@@ -56,7 +56,7 @@ impl StatementType {
 pub struct Statement {
     /// Depicts the type of Operation the statement conveys.
     pub stype: StatementType,
-    /// The key variable, only used in get/set/rem statements.
+    /// The key variable, only used in get/set/del statements.
     pub key: Option<String>,
     /// The value variable, only used in set statements.
     pub value: Option<String>,
@@ -78,7 +78,7 @@ impl Statement {
         // The first word after the operation keyword is supposed to be
         // the statement key, else the statement has failed to parse.
         let key = match stype {
-            StatementType::Get | StatementType::Set | StatementType::Rem => {
+            StatementType::Get | StatementType::Set | StatementType::Del => {
                 if cmd_words.len() < 2 {
                     // Incase the user forgets to input required options
                     // for an operation, fail by setting None.
@@ -112,13 +112,15 @@ impl Statement {
                     Some(cmd_val)
                 }
             }
-            _ => {
+            StatementType::Get | StatementType::Del => {
                 if cmd_words.len() > 2 {
-                    // Incase the user passes in too much data for an operation, warn them.
+                    // Incase the user unnecessarily inputs a value for either 
+                    // GET or DEL operations, warn them and don't use the value.
                     eprintln!("Warning: Too many inputs, `{}` was ignored.", cmd_val);
                 }
                 None
-            }
+            },
+            _ => None,
         };
 
         // Quick Fix to #1. If for most operations key is set to None and for set operation only,
