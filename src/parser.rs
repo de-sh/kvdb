@@ -1,5 +1,6 @@
 /// There are 3 types of statement in KVDB, GET/SET/DEL.
 #[derive(PartialEq)]
+#[cfg_attr(test, derive(Debug))]
 pub enum StatementType {
     /// Relates to the set() method of the Storage Engine.
     Set,
@@ -38,6 +39,7 @@ impl StatementType {
 
 /// Describes the structure of a REPL statement.
 #[derive(PartialEq)]
+#[cfg_attr(test, derive(Debug))]
 pub struct Statement {
     /// Depicts the type of Operation the statement conveys.
     pub stype: StatementType,
@@ -121,6 +123,172 @@ impl Statement {
             }
         } else {
             Self { stype, key, value }
+        }
+    }
+}
+
+#[cfg(test)]
+mod statement_prep {
+    use super::*;
+
+    macro_rules! get_statement {
+        ($input: literal) => {
+            Statement::prep(&$input.to_owned());
+        };
+    }
+
+    #[test]
+    fn test_returns_unk_on_unknown_statement() {
+        let statement = get_statement!("UNKNOWN_STATEMENT");
+        assert_eq!(
+            statement,
+            Statement {
+                stype: StatementType::Unk,
+                key: None,
+                value: None
+            }
+        );
+    }
+
+    mod get {
+        use super::*;
+
+        #[test]
+        fn test_parsing_get_without_key() {
+            let statement = get_statement!("GET");
+            assert_eq!(
+                statement,
+                Statement {
+                    stype: StatementType::Fail,
+                    key: None,
+                    value: None
+                }
+            );
+        }
+
+        #[test]
+        fn test_parsing_proper_get_statement() {
+            let statement = get_statement!("GET MY_KEY");
+            assert_eq!(
+                statement,
+                Statement {
+                    stype: StatementType::Get,
+                    key: Some("MY_KEY".to_owned()),
+                    value: None
+                }
+            );
+        }
+
+        #[test]
+        fn test_ignoring_multiple_keys_on_get() {
+            let statement = get_statement!("GET KEY1 KEY2 KEY3");
+            assert_eq!(
+                statement,
+                Statement {
+                    stype: StatementType::Get,
+                    key: Some("KEY1".to_owned()),
+                    value: None
+                }
+            );
+        }
+    }
+
+    mod del {
+        use super::*;
+
+        #[test]
+        fn test_parsing_del_without_key() {
+            let statement = get_statement!("DEL");
+            assert_eq!(
+                statement,
+                Statement {
+                    stype: StatementType::Fail,
+                    key: None,
+                    value: None
+                }
+            );
+        }
+
+        #[test]
+        fn test_parsing_proper_del_statement() {
+            let statement = get_statement!("DEL MY_KEY");
+            assert_eq!(
+                statement,
+                Statement {
+                    stype: StatementType::Del,
+                    key: Some("MY_KEY".to_owned()),
+                    value: None
+                }
+            );
+        }
+
+        #[test]
+        fn test_ignoring_multiple_keys_on_del() {
+            let statement = get_statement!("DEL KEY1 KEY2 KEY3");
+            assert_eq!(
+                statement,
+                Statement {
+                    stype: StatementType::Del,
+                    key: Some("KEY1".to_owned()),
+                    value: None
+                }
+            );
+        }
+    }
+
+    mod set {
+        use super::*;
+
+        #[test]
+        fn test_parsing_set_without_key() {
+            let statement = get_statement!("SET");
+            assert_eq!(
+                statement,
+                Statement {
+                    stype: StatementType::Fail,
+                    key: None,
+                    value: None
+                }
+            );
+        }
+
+        #[test]
+        fn test_parsing_empty_valued_set_statement() {
+            let statement = get_statement!("SET MY_KEY");
+            assert_eq!(
+                statement,
+                Statement {
+                    stype: StatementType::Fail,
+                    key: None,
+                    value: None
+                }
+            );
+        }
+
+        #[test]
+        fn test_parsing_proper_set_statement() {
+            let statement = get_statement!("SET MY_KEY MY_VALUE");
+            assert_eq!(
+                statement,
+                Statement {
+                    stype: StatementType::Set,
+                    key: Some("MY_KEY".to_owned()),
+                    value: Some("MY_VALUE".to_owned())
+                }
+            );
+        }
+
+        #[test]
+        fn returns_set_considering_all_next_values() {
+            let statement = get_statement!("SET KEY1 VALUE1 VALUE2 VALUE3");
+            assert_eq!(
+                statement,
+                Statement {
+                    stype: StatementType::Set,
+                    key: Some("KEY1".to_owned()),
+                    value: Some("VALUE1 VALUE2 VALUE3".to_owned())
+                }
+            );
         }
     }
 }

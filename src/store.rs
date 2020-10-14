@@ -3,6 +3,7 @@ use std::fmt::Display;
 use std::hash::Hash;
 
 /// Depicts whether an operation was successfully executed or not.
+#[cfg_attr(test, derive(PartialEq, Debug))]
 pub enum ExecResult {
     Success,
     Failed,
@@ -66,5 +67,54 @@ impl<A: Hash + Eq + Display, B: Display + Clone> Store<A, B> {
                 ExecResult::Failed
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_key_not_found() {
+        let store: Store<&str, &str> = Store::new();
+
+        let result = store.get("key1");
+        assert_eq!(result, Err(ExecResult::Failed));
+    }
+
+    #[test]
+    fn test_set_key_in_use() {
+        let mut store = Store::new();
+
+        let result = store.set("key1", "value1");
+        assert_eq!(result, ExecResult::Success);
+
+        let result = store.set("key1", "value1");
+        assert_eq!(result, ExecResult::Failed);
+    }
+
+    #[test]
+    fn test_del_key_not_found() {
+        let mut store: Store<&str, &str> = Store::new();
+
+        let result = store.del("key1");
+        assert_eq!(result, ExecResult::Failed);
+    }
+
+    #[test]
+    fn test_flow_ok() {
+        let mut store = Store::new();
+
+        let result = store.set("key1", "value1");
+        assert_eq!(result, ExecResult::Success);
+
+        let result = store.get("key1");
+        assert_eq!(result, Ok("value1"));
+
+        let result = store.del("key1");
+        assert_eq!(result, ExecResult::Success);
+
+        let result = store.get("key1");
+        assert_eq!(result, Err(ExecResult::Failed));
     }
 }
