@@ -10,6 +10,9 @@ mod repl;
 /// Code related to the heart of a database, the storage engine.
 pub mod store;
 
+/// Defines an experimental LSMT based persistant storage API.
+pub mod lsmt;
+
 use repl::REPL;
 
 /// Create and start an instance of the REPL.
