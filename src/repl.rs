@@ -1,5 +1,5 @@
 use std::io;
-use std::io::Write;
+use std::io::{Write, stdin, BufRead};
 
 use crate::parser::{Statement, StatementType};
 use crate::store::{ExecResult, Store};
@@ -23,24 +23,21 @@ impl REPL {
 
     /// Starts REPL execution in earnest.
     pub fn repl(&mut self) {
-        loop {
-            // Prompt
-            print!("db > ");
-            // Read
-            self.read_input();
+        // Initial prompt
+        print!("KVDBv0.1.0 \nThis is an experimental database, do contribute to further developments at https://github.com/de-sh/kvdb. \nUse `.exit` to exit the repl\ndb > ");
+        io::stdout().flush().expect("Error");
+        // Read
+        for cmd in stdin().lock().lines() {
+            match cmd {
+                Ok(cmd) => self.cmd = cmd.trim().to_string(),
+                Err(_) => print!("Error in reading command, exiting REPL."),
+            }
             // Evaluate and Print/Execute
             self.parse_input();
+            // Prompt
+            print!("db > ");
+            io::stdout().flush().expect("Error");
         }
-    }
-
-    /// Takes input from the REPL user.
-    fn read_input(&mut self) {
-        let mut cmd = "".to_owned();
-        io::stdout().flush().expect("Error");
-        io::stdin()
-            .read_line(&mut cmd)
-            .expect("Error in reading command, exiting REPL.");
-        self.cmd = cmd.trim().to_string();
     }
 
     /// Parses Commands from the REPL. If Meta, executes on REPL environment,
