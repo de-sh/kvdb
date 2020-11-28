@@ -14,3 +14,7 @@ impl LSMT {
         todo!()
     }
 }
+
+pub enum LSMTError {
+    
+}
