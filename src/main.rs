@@ -13,6 +13,9 @@ pub mod store;
 /// Defines an experimental LSMT based persistant storage API.
 pub mod lsmt;
 
+/// Defines available persistant storage configurations.
+pub mod config;
+
 use repl::REPL;
 
 /// Create and start an instance of the REPL.

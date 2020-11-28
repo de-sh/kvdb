@@ -1,5 +1,5 @@
 use std::io;
-use std::io::{Write, stdin, BufRead};
+use std::io::{stdin, BufRead, Write};
 
 use crate::parser::{Statement, StatementType};
 use crate::store::{ExecResult, Store};

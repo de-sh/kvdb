@@ -1,7 +1,8 @@
+use crate::config::Config;
+use crate::lsmt::{LSMTError, LSMT};
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::Hash;
-use crate::lsmt::{LSMT, LSMTError};
 
 /// Depicts whether an operation was successfully executed or not.
 #[cfg_attr(test, derive(PartialEq, Debug))]
