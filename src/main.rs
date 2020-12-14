@@ -24,14 +24,15 @@ use repl::REPL;
 #[tokio::main]
 async fn main() {
     match std::env::args().nth(1) {
-        Some(s) => if s == ("server".to_string()) {
-            server::serve(
-                match std::env::args().nth(2) {
+        Some(s) => {
+            if s == ("server".to_string()) {
+                server::serve(match std::env::args().nth(2) {
                     Some(addr) => addr,
-                    None => "127.0.0.1:6379".to_string()
-                }
-            ).await;
-        },
-        None => REPL::new().repl()
+                    None => "127.0.0.1:6379".to_string(),
+                })
+                .await;
+            }
+        }
+        None => REPL::new().repl(),
     }
 }
