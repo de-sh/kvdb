@@ -1,7 +1,6 @@
 use crate::config::Config;
 use crate::lsmt::{LSMTError, LSMT};
 use std::collections::HashMap;
-use std::fmt::Display;
 use std::hash::Hash;
 
 /// Depicts whether an operation was successfully executed or not.
@@ -20,7 +19,7 @@ pub struct Store<A, B> {
 
 /// As is clear from the implementation, types A and B must implement Display
 /// to be 'printable'. While A must also implement Hash and Eq traits
-impl<A: Hash + Eq + Display, B: Display + Clone> Store<A, B> {
+impl<A: Hash + Eq, B: Clone> Store<A, B> {
     /// Creates a new Storage Engine.
     pub fn new() -> Self {
         Self {
@@ -32,11 +31,7 @@ impl<A: Hash + Eq + Display, B: Display + Clone> Store<A, B> {
     pub fn set(&mut self, key: A, value: B) -> ExecResult {
         // Fails if key already points to another value, else stores key-value pair and returns success.
         if self.storage.contains_key(&key) {
-            eprintln!(
-                "Error: `{}` already associated with value `{}`.",
-                self.storage.get(&key).unwrap(),
-                key
-            );
+            eprintln!("Error: Key already associated with another value.");
             ExecResult::Failed
         } else {
             self.storage.insert(key, value);
@@ -58,14 +53,11 @@ impl<A: Hash + Eq + Display, B: Display + Clone> Store<A, B> {
     pub fn del(&mut self, key: A) -> ExecResult {
         match self.storage.remove(&key) {
             Some(val) => {
-                println!("Deleted: {} -> {}", key, val);
+                println!("Deleted: Key -> Value mapping.");
                 ExecResult::Success
             }
             None => {
-                eprintln!(
-                    "Error: Can't deleteremove, as no value associated with key `{}`.",
-                    key
-                );
+                eprintln!("Error: Can't remove, as no value associated with key.");
                 ExecResult::Failed
             }
         }
