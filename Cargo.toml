@@ -4,6 +4,11 @@ version = "0.1.0"
 authors = ["Devdutt Shenoi <devdutt@outlook.in>"]
 edition = "2018"
 
-
 [dependencies]
-tokio = { version = "0.3", features = ["full"] }
+tokio = { version = "0.2", features = ["full"] }
+bytes = "1"
+tonic = "0.3"
+prost = "0.6"
+
+[build-dependencies]
+tonic-build = "0.3.0"
